@@ -1,63 +1,31 @@
-name: Wisecow CI/CD (Local Ubuntu + Minikube/Kind)
+name: Wisecow CI
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:   # allows manual trigger
+  workflow_dispatch:  # Optional: allows manual trigger
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repository
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2️⃣ Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # 3️⃣ Login to Docker Hub
-      - name: Login to Docker Hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4️⃣ Build and push Docker image
       - name: Build and Push Docker image
         uses: docker/build-push-action@v4
         with:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/wisecow:latest
-
-      # 5️⃣ Set up kubectl
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: v1.28.0
-
-      # 6️⃣ Start Minikube (Optional if running locally)
-      # Uncomment below if you are running the workflow locally on Ubuntu
-      #- name: Start Minikube
-      #  run: |
-      #    minikube start --driver=docker
-
-      # 7️⃣ Load Docker image into Kind cluster (if using Kind)
-      # Uncomment below if using Kind
-      #- name: Load image into Kind
-      #  run: |
-      #    kind load docker-image ${{ secrets.DOCKER_USERNAME }}/wisecow:latest --name wisecow
-
-      # 8️⃣ Apply Kubernetes manifests
-      - name: Deploy Wisecow to Kubernetes
-        run: |
-          # Use local kubeconfig (Minikube or Kind)
-          export KUBECONFIG=$HOME/.kube/config
-          kubectl apply -f wisecow-deployment.yaml
-          kubectl apply -f wisecow-service.yaml
-          kubectl get pods
-          kubectl get svc
 
