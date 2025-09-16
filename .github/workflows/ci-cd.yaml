@@ -25,8 +25,9 @@ jobs:
     - name: Build and Push Docker image
       uses: docker/build-push-action@v4
       with:
+        context: .
         push: true
-        tags: ${{ secrets.pavanikoduru22 }}/wisecow:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/wisecow:latest
 
     - name: Set up kubectl
       uses: azure/setup-kubectl@v3
